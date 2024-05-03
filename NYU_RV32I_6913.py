@@ -98,8 +98,8 @@ class State(object):
                    "Rt": "0"*5, "Wrt_reg_addr": "0"*5, "is_I_type": "0", "rd_mem": "0", 
                    "wrt_mem": "0", "alu_op": "00", "wrt_enable": "0"}
         self.MEM = {"nop": False, "ALUresult": "0"*32, "Store_data":"0"*32, "Rs": "0"*5, "Rt": "0"*5, 
-                    "Wrt_reg_addr": "0"*5, "rd_mem": "0", "wrt_mem": "0", "wrt_enable": "0"}
-        self.WB = {"nop": False, "Wrt_data": "0"*32, "Rs": "0"*5, "Rt": "0"*5, "Wrt_reg_addr": "0"*5, "wrt_enable": "0"}
+                    "Wrt_reg_addr": "0"*5, "rd_mem": "0", "wrt_mem": "0", "wrt_enable": "0", "inst_dict": {}}
+        self.WB = {"nop": False, "Wrt_data": "0"*32, "Rs": "0"*5, "Rt": "0"*5, "Wrt_reg_addr": "0"*5, "wrt_enable": "0", "inst_dict": {}}
 
 class Core(object):
 
@@ -578,12 +578,17 @@ class FiveStageCore(Core):
         # Your implementation
 
         # --------------------- WB stage ---------------------
+        print("WB stage")
+
         if not self.state.WB["nop"] and self.state.WB["wrt_enable"]:
+            print(f"{self.state.WB['inst_dict']['inst_type'] if self.state.WB['inst_dict'] else 'Uninitialized'} type instruction in WB stage")
             self.myRF.writeRF(self.state.WB["Wrt_reg_addr"], self.state.WB["Wrt_data"])
 
-        # --------------------- MEM stage ---------------------   
+        # --------------------- MEM stage ---------------------
+        print("MEM stage")   
 
         if not self.state.MEM["nop"]:
+            print(f"{self.state.MEM['inst_dict']['inst_type'] if self.state.MEM['inst_dict'] else 'Uninitialized'} type instruction in MEM stage")
             # Insturction that updates RF: LW, I-type, R-type
             if self.state.MEM["wrt_enable"] == "1":
                 # LW
@@ -603,9 +608,11 @@ class FiveStageCore(Core):
         # else:
         #     self.nextState.EX = self.state.EX.copy()
         self.nextState.WB["nop"] = self.state.MEM["nop"]
+        self.nextState.WB["inst_dict"] = self.state.MEM["inst_dict"]
+
         
         # --------------------- EX stage ---------------------  
-
+        print("EX stage")
         if not self.state.EX["nop"]:
             # Forwarding mux
             self.forwardA_data["00"] = self.state.EX["Read_data1"]
@@ -614,6 +621,7 @@ class FiveStageCore(Core):
             read_data_2 = self.forwardB_data[self.forwardB]
 
             inst_dict = self.decode(self.state.EX["instr"][::-1])
+            print(f"{inst_dict['inst_type']} type instruction in EX stage")
             inst_type = inst_dict["inst_type"]
             opcode = inst_dict["opcode"]
             funct3 = ""
@@ -651,12 +659,15 @@ class FiveStageCore(Core):
             self.nextState.MEM["wrt_enable"] = self.state.EX["wrt_enable"]
             self.nextState.MEM["rd_mem"] = self.state.EX["rd_mem"]
             self.nextState.MEM["wrt_mem"] = self.state.EX["wrt_mem"]
+            self.nextState.MEM["inst_dict"] = inst_dict
         
         # else:
         #     self.nextState.EX = self.state.EX.copy()
         self.nextState.MEM["nop"] = self.state.EX["nop"]
         
         # --------------------- ID stage --------------------
+        print("ID stage")
+
         self.forwardA = "00"
         self.forwardB = "00"        
         
@@ -666,6 +677,7 @@ class FiveStageCore(Core):
             instruction_lh = instruction_hl[::-1]
             self.instructionDebug(instructionLH=instruction_lh)
             inst_dict: dict = self.decode(instruction_lh)
+            print(f"{inst_dict['inst_type']} type instruction in ID stage")
             inst_type = inst_dict["inst_type"]
             opcode = inst_dict["opcode"]
             funct3 = ""
@@ -685,11 +697,11 @@ class FiveStageCore(Core):
             elif inst_type in ["I"]:
                 self.nextState.EX["Rs"] = inst_dict[inst_type]["rs1"]
             else:
-                
+
                 pass # to-do pass previous rs rt to next state
 
             # immediate
-            if inst_type in ["I", "S", "J", "B", "HALT"]:
+            if inst_type in ["I", "S", "J", "B"]:
                 self.nextState.EX["Imm"] = inst_dict[inst_type]["imm"]
 
             # Address of the instruction’s destination register. 
@@ -698,7 +710,7 @@ class FiveStageCore(Core):
                 self.nextState.EX["Wrt_reg_addr"] = inst_dict[inst_type]["rd"]
 
             # Set if instruction updates RF
-            if inst_type in ["R", "I", "J", "S"]:
+            if inst_type in ["R", "I", "J"]:
                 self.nextState.EX["wrt_enable"] = "1"
             else:
                 self.nextState.EX["wrt_enable"] = "0"
@@ -747,37 +759,42 @@ class FiveStageCore(Core):
 
             rs1 = inst_dict[inst_dict["inst_type"]]["rs1"] if "rs1" in inst_dict[inst_dict["inst_type"]].keys() else ""
             rs2 = inst_dict[inst_dict["inst_type"]]["rs2"] if "rs2" in inst_dict[inst_dict["inst_type"]].keys() else ""
+
             # Load use hazard
             # MEM to EX LW -> R
             if not self.nextState.MEM["nop"] and self.nextState.MEM["wrt_enable"] == "1" \
-            and self.nextState.MEM["rd_mem"] == "1":
-                if rs1 == self.nextState.MEM["Wrt_reg_addr"] or rs2 == self.nextState.MEM["Wrt_reg_addr"]:
+            and self.nextState.MEM["rd_mem"] == "1":            
+                rs_dependency = rs1 == self.nextState.MEM["Wrt_reg_addr"]
+                rt_dependency = rs2 == self.nextState.MEM["Wrt_reg_addr"]
+                if rs_dependency or rt_dependency:
+                    dependency_type = "Add-" if self.nextState.EX["is_I_type"] == "1" else "Load-Add"
+                    
+                    dependency_type += "Load" if self.nextState.EX["is_I_type"] == "1"\
+                          and self.nextState.EX["rd_mem"] == "1" \
+                    else "Store" if self.nextState.EX["is_I_type"] else "Add"
+                    print(f"{dependency_type} Dependency: EX-EX Forwarding")
                     print("Load use hazard detected")
                     self.no_stall = False
-
-            # if not self.nextState.MEM["nop"] and self.state.MEM["wrt_enable"] == "1" \
-            # and self.state.MEM["rd_mem"] == "1":
-            #     if rs1 == self.state.EX["Wrt_reg_addr"] or rs2 == self.state.EX["Wrt_reg_addr"]:
-            #         print("Load use hazard detected")
-            #         self.no_stall = False
-
-            # if self.no_stall:
-            # R - R hazard, EX - EX forwarding
-            if not self.nextState.MEM["nop"] and self.nextState.MEM["wrt_enable"] == "1" \
-                and self.nextState.MEM["rd_mem"] == "1" and self.to_decimal(self.nextState.EX["Wrt_reg_addr"]) != 0:
-                if rs1 == self.nextState.EX["Wrt_reg_addr"]: # Rs
-                    self.forwardA = "10"
-                    self.forwardA_data["10"] = self.nextState.MEM["ALUresult"]
-                if rs2 == self.nextState.EX["Wrt_reg_addr"]: # Rt 
-                    self.forwardB = "10"
-                    self.forwardB_data["10"] = self.nextState.MEM["ALUresult"]
+                    
+                    if rs_dependency:
+                        print("EX - EX forwarding rs")
+                        self.forwardA = "10"
+                        self.forwardA_data["10"] = self.nextState.MEM["ALUresult"]
+                    if rt_dependency:
+                        print("EX - EX forwarding rt")
+                        self.forwardB = "10"
+                        self.forwardB_data["10"] = self.nextState.MEM["ALUresult"]
             
             # MEM - EX forwarding
             if not self.nextState.WB["nop"] and self.nextState.WB["wrt_enable"] == "1":
-                if rs1 == self.nextState.WB["Wrt_reg_addr"]: # Rs
+                rs_wb_dependency = rs1 == self.nextState.WB["Wrt_reg_addr"]
+                rt_wb_dependency = rs2 == self.nextState.WB["Wrt_reg_addr"]
+                if rs_wb_dependency: # rs1
+                    print("MEM - EX forwarding rs")
                     self.forwardA = "01"
                     self.forwardA_data["01"] = self.nextState.WB["Wrt_data"]
-                if rs2 == self.nextState.WB["Wrt_reg_addr"]: # Rt 
+                if rt_wb_dependency: # rs2
+                    print("MEM - EX forwarding rt")
                     self.forwardB = "01"
                     self.forwardB_data["01"] = self.nextState.WB["Wrt_data"]
 
@@ -787,12 +804,15 @@ class FiveStageCore(Core):
 
         if not self.no_stall:
             self.nextState.EX["nop"] = True
+            self.nextState.ID["nop"] = True
             self.nextState.IF["PC"] -= 4
             self.no_stall = True
         else:    
             self.nextState.EX["nop"] = self.state.ID["nop"]
 
         # --------------------- IF stage ---------------------
+
+        print("IF stage")
         
         if not self.state.IF['nop']:
             instr_addr: int = self.state.IF["PC"]
@@ -801,8 +821,8 @@ class FiveStageCore(Core):
             instruction_hl: str = self.ext_imem.readInstr(instr_addr)
             # Low bit -> high bit instruction for decoding
             instruction_lh = instruction_hl[::-1]
-            print("Instruction High -> Low bit: ", instruction_hl)
-            print("Instruction Low -> High bit: ", instruction_lh)
+            print("IF Instruction High -> Low bit: ", instruction_hl)
+            print("IF Instruction Low -> High bit: ", instruction_lh)
             # Check HALT
             if all(c == "1" for c in instruction_lh):
                 self.nextState.IF["PC"] = self.state.IF["PC"]
@@ -812,11 +832,11 @@ class FiveStageCore(Core):
                 self.instruction_count += 1
                 self.nextState.IF["PC"] = instr_addr + 4
                 self.nextState.ID["Instr"] = instruction_hl
+                self.nextState.ID["nop"] = self.state.IF["nop"]
             # For JAL add PC and Imm
             # self.nextState.ID["PC"] = self.state.IF["PC"]
         # else:
         #     self.nextState.IF = self.state.IF.copy()
-        self.nextState.ID["nop"] = self.state.IF["nop"]
         
         # self.halted = True
         if self.state.IF["nop"] and self.state.ID["nop"] and self.state.EX["nop"] and self.state.MEM["nop"] and self.state.WB["nop"]:

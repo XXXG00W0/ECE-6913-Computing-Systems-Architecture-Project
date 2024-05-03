@@ -26,12 +26,14 @@ MEM.Wrt_reg_addr: 00000
 MEM.rd_mem: 0
 MEM.wrt_mem: 0
 MEM.wrt_enable: 0
+MEM.inst_dict: {}
 WB.nop: True
 WB.Wrt_data: 00000000000000000000000000000000
 WB.Rs: 00000
 WB.Rt: 00000
 WB.Wrt_reg_addr: 00000
 WB.wrt_enable: 0
+WB.inst_dict: {}
 ----------------------------------------------------------------------
 State after executing cycle: 1
 IF.nop: False
@@ -60,12 +62,14 @@ MEM.Wrt_reg_addr: 00000
 MEM.rd_mem: 0
 MEM.wrt_mem: 0
 MEM.wrt_enable: 0
+MEM.inst_dict: {}
 WB.nop: True
 WB.Wrt_data: 00000000000000000000000000000000
 WB.Rs: 00000
 WB.Rt: 00000
 WB.Wrt_reg_addr: 00000
 WB.wrt_enable: 0
+WB.inst_dict: {}
 ----------------------------------------------------------------------
 State after executing cycle: 2
 IF.nop: False
@@ -94,12 +98,14 @@ MEM.Wrt_reg_addr: 00001
 MEM.rd_mem: 1
 MEM.wrt_mem: 0
 MEM.wrt_enable: 1
+MEM.inst_dict: {'inst_type': 'I', 'opcode': '0000011', 'R': {}, 'I': {'funct3': '000', 'imm': '000000000000', 'rd': '00001', 'rs1': '00000'}, 'S': {}, 'B': {}, 'HALT': {}}
 WB.nop: True
 WB.Wrt_data: 00000000000000000000000000000000
 WB.Rs: 00000
 WB.Rt: 00000
 WB.Wrt_reg_addr: 00000
 WB.wrt_enable: 0
+WB.inst_dict: {}
 ----------------------------------------------------------------------
 State after executing cycle: 3
 IF.nop: False
@@ -128,12 +134,14 @@ MEM.Wrt_reg_addr: 00010
 MEM.rd_mem: 1
 MEM.wrt_mem: 0
 MEM.wrt_enable: 1
+MEM.inst_dict: {'inst_type': 'I', 'opcode': '0000011', 'R': {}, 'I': {'funct3': '000', 'imm': '000000000100', 'rd': '00010', 'rs1': '00000'}, 'S': {}, 'B': {}, 'HALT': {}}
 WB.nop: False
 WB.Wrt_data: 01010101010101010101010101010101
 WB.Rs: 00000
 WB.Rt: 00000
 WB.Wrt_reg_addr: 00001
 WB.wrt_enable: 1
+WB.inst_dict: {'inst_type': 'I', 'opcode': '0000011', 'R': {}, 'I': {'funct3': '000', 'imm': '000000000000', 'rd': '00001', 'rs1': '00000'}, 'S': {}, 'B': {}, 'HALT': {}}
 ----------------------------------------------------------------------
 State after executing cycle: 4
 IF.nop: False
@@ -162,145 +170,11 @@ MEM.Wrt_reg_addr: 00010
 MEM.rd_mem: 1
 MEM.wrt_mem: 0
 MEM.wrt_enable: 1
+MEM.inst_dict: {'inst_type': 'I', 'opcode': '0000011', 'R': {}, 'I': {'funct3': '000', 'imm': '000000000100', 'rd': '00010', 'rs1': '00000'}, 'S': {}, 'B': {}, 'HALT': {}}
 WB.nop: False
 WB.Wrt_data: 00110011001100110011001100110011
 WB.Rs: 00000
 WB.Rt: 00000
 WB.Wrt_reg_addr: 00010
 WB.wrt_enable: 1
-----------------------------------------------------------------------
-State after executing cycle: 5
-IF.nop: True
-IF.PC: 16
-ID.nop: True
-ID.Instr: 00000000001100000010010000100011
-EX.nop: False
-EX.instr: 00000000001100000010010000100011
-EX.Read_data1: 00000000000000000000000000000000
-EX.Read_data2: 00000000000000000000000000000000
-EX.Imm: 000000001000
-EX.Rs: 00001
-EX.Rt: 00010
-EX.Wrt_reg_addr: 00011
-EX.is_I_type: 0
-EX.rd_mem: 0
-EX.wrt_mem: 1
-EX.alu_op: 00
-EX.wrt_enable: 1
-MEM.nop: False
-MEM.ALUresult: 10001000100010001000100010001000
-MEM.Store_data: 00000000000000000000000000000000
-MEM.Rs: 00001
-MEM.Rt: 00010
-MEM.Wrt_reg_addr: 00011
-MEM.rd_mem: 0
-MEM.wrt_mem: 0
-MEM.wrt_enable: 1
-WB.nop: True
-WB.Wrt_data: 00110011001100110011001100110011
-WB.Rs: 00000
-WB.Rt: 00000
-WB.Wrt_reg_addr: 00010
-WB.wrt_enable: 1
-----------------------------------------------------------------------
-State after executing cycle: 6
-IF.nop: True
-IF.PC: 16
-ID.nop: True
-ID.Instr: 00000000001100000010010000100011
-EX.nop: True
-EX.instr: 00000000001100000010010000100011
-EX.Read_data1: 00000000000000000000000000000000
-EX.Read_data2: 00000000000000000000000000000000
-EX.Imm: 000000001000
-EX.Rs: 00001
-EX.Rt: 00010
-EX.Wrt_reg_addr: 00011
-EX.is_I_type: 0
-EX.rd_mem: 0
-EX.wrt_mem: 1
-EX.alu_op: 00
-EX.wrt_enable: 1
-MEM.nop: False
-MEM.ALUresult: 00000000000000000000000000000000
-MEM.Store_data: 00000000000000000000000000000000
-MEM.Rs: 00001
-MEM.Rt: 00010
-MEM.Wrt_reg_addr: 00011
-MEM.rd_mem: 0
-MEM.wrt_mem: 1
-MEM.wrt_enable: 1
-WB.nop: False
-WB.Wrt_data: 10001000100010001000100010001000
-WB.Rs: 00001
-WB.Rt: 00010
-WB.Wrt_reg_addr: 00011
-WB.wrt_enable: 1
-----------------------------------------------------------------------
-State after executing cycle: 7
-IF.nop: True
-IF.PC: 16
-ID.nop: True
-ID.Instr: 00000000001100000010010000100011
-EX.nop: True
-EX.instr: 00000000001100000010010000100011
-EX.Read_data1: 00000000000000000000000000000000
-EX.Read_data2: 00000000000000000000000000000000
-EX.Imm: 000000001000
-EX.Rs: 00001
-EX.Rt: 00010
-EX.Wrt_reg_addr: 00011
-EX.is_I_type: 0
-EX.rd_mem: 0
-EX.wrt_mem: 1
-EX.alu_op: 00
-EX.wrt_enable: 1
-MEM.nop: True
-MEM.ALUresult: 00000000000000000000000000000000
-MEM.Store_data: 00000000000000000000000000000000
-MEM.Rs: 00001
-MEM.Rt: 00010
-MEM.Wrt_reg_addr: 00011
-MEM.rd_mem: 0
-MEM.wrt_mem: 1
-MEM.wrt_enable: 1
-WB.nop: False
-WB.Wrt_data: 00000000000000000000000000000000
-WB.Rs: 00001
-WB.Rt: 00010
-WB.Wrt_reg_addr: 00011
-WB.wrt_enable: 1
-----------------------------------------------------------------------
-State after executing cycle: 8
-IF.nop: True
-IF.PC: 16
-ID.nop: True
-ID.Instr: 00000000001100000010010000100011
-EX.nop: True
-EX.instr: 00000000001100000010010000100011
-EX.Read_data1: 00000000000000000000000000000000
-EX.Read_data2: 00000000000000000000000000000000
-EX.Imm: 000000001000
-EX.Rs: 00001
-EX.Rt: 00010
-EX.Wrt_reg_addr: 00011
-EX.is_I_type: 0
-EX.rd_mem: 0
-EX.wrt_mem: 1
-EX.alu_op: 00
-EX.wrt_enable: 1
-MEM.nop: True
-MEM.ALUresult: 00000000000000000000000000000000
-MEM.Store_data: 00000000000000000000000000000000
-MEM.Rs: 00001
-MEM.Rt: 00010
-MEM.Wrt_reg_addr: 00011
-MEM.rd_mem: 0
-MEM.wrt_mem: 1
-MEM.wrt_enable: 1
-WB.nop: True
-WB.Wrt_data: 00000000000000000000000000000000
-WB.Rs: 00001
-WB.Rt: 00010
-WB.Wrt_reg_addr: 00011
-WB.wrt_enable: 1
+WB.inst_dict: {'inst_type': 'I', 'opcode': '0000011', 'R': {}, 'I': {'funct3': '000', 'imm': '000000000100', 'rd': '00010', 'rs1': '00000'}, 'S': {}, 'B': {}, 'HALT': {}}
